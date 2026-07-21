@@ -1,0 +1,17 @@
+{
+  "name": "jumellecafe",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "private": true,
+  "packageManager": "pnpm@10.33.3",
+  "scripts": {
+    "preinstall": "npx -y only-allow pnpm",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --if-present run typecheck"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "prettier": "^3.4.2"
+  }
+}

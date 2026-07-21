@@ -1,0 +1,37 @@
+{
+  "name": "@jumelle/api-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/index.ts",
+    "seed": "tsx --env-file=.env scripts/seed.ts",
+    "seed:sample": "tsx --env-file=.env scripts/seedSampleData.ts",
+    "build": "node ./build.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@jumelle/db": "workspace:*",
+    "@jumelle/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.47.10",
+    "cors": "^2.8.5",
+    "drizzle-orm": "catalog:",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "jsonwebtoken": "^9.0.3",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "catalog:",
+    "esbuild": "0.25.8",
+    "esbuild-plugin-pino": "^2.2.0",
+    "pino-pretty": "^13.0.0",
+    "thread-stream": "3.1.0",
+    "tsx": "catalog:"
+  }
+}

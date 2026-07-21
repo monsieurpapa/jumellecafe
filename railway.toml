@@ -1,0 +1,14 @@
+# Deploys artifacts/api-server. Root Directory in the Railway service
+# settings must stay the repo root (NOT artifacts/api-server) — pnpm
+# workspaces need `pnpm install` run from the root to resolve the
+# `workspace:*` deps on @jumelle/db and @jumelle/shared.
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile && pnpm run typecheck:libs && pnpm --filter @jumelle/api-server typecheck && pnpm --filter @jumelle/api-server build"
+
+[deploy]
+startCommand = "pnpm --filter @jumelle/api-server start"
+healthcheckPath = "/api/healthz"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

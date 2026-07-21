@@ -1,0 +1,5 @@
+{
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm run typecheck:libs && pnpm --filter @jumelle/web-admin build",
+  "outputDirectory": "dist"
+}

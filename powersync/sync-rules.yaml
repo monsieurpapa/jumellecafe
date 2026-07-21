@@ -1,0 +1,28 @@
+# PowerSync sync rules for jumelleCafe — deployed to the PowerSync Cloud
+# instance's dashboard (or via its CLI), not consumed directly by any app
+# in this repo. Kept here for version control alongside the schema it
+# depends on.
+#
+# Bucket parameters read cooperative_id from the custom JWT minted by
+# POST /api/powersync/token (artifacts/api-server/src/lib/powersyncJwt.ts)
+# after Express has validated the device binding — see plan §4/§5.
+#
+# Phase 1: producteurs + parcelles. Phase 2 adds stations (download-only —
+# created online by the admin, referenced by the offline livraison form)
+# and livraisons (uploaded offline like producteurs). Tables here must match
+# artifacts/field-pwa/src/powersync/schema.ts. Add more `data` queries
+# (or new bucket definitions) as later phases add synced tables — and
+# re-deploy to the PowerSync instance whenever this file changes.
+bucket_definitions:
+  by_cooperative:
+    # cooperative_id is a signed JWT claim, never a client-supplied
+    # parameter — every synced table is scoped to the caller's own
+    # cooperative, mirroring the server-side re-derivation in
+    # artifacts/api-server/src/routes/sync.ts.
+    parameters: SELECT request.jwt() ->> 'cooperative_id' as cooperative_id
+    data:
+      - SELECT * FROM producteurs WHERE producteurs.cooperative_id = bucket.cooperative_id
+      - SELECT * FROM parcelles WHERE parcelles.cooperative_id = bucket.cooperative_id
+      - SELECT * FROM stations WHERE stations.cooperative_id = bucket.cooperative_id
+      - SELECT * FROM livraisons WHERE livraisons.cooperative_id = bucket.cooperative_id
+      - SELECT * FROM inspections WHERE inspections.cooperative_id = bucket.cooperative_id

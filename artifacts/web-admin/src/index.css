@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Glowing/pulsing marker for the Parcelles GPS map (ParcellesMap.tsx) —
+   a plain Leaflet divIcon, not a Tailwind-scanned class, so it's defined
+   directly here rather than as a utility. */
+.parcelle-marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+  animation: parcelle-pulse 2s infinite;
+  cursor: pointer;
+}
+
+.parcelle-marker.parcelle-marker--selected {
+  background: #fbbf24;
+  animation-name: parcelle-pulse-selected;
+}
+
+@keyframes parcelle-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
+}
+
+@keyframes parcelle-pulse-selected {
+  0% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(251, 191, 36, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+}
