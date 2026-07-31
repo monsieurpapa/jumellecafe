@@ -1,28 +1,70 @@
-# PowerSync sync rules for jumelleCafe — deployed to the PowerSync Cloud
-# instance's dashboard (or via its CLI), not consumed directly by any app
-# in this repo. Kept here for version control alongside the schema it
-# depends on.
+# PowerSync Sync Streams config for jumelleCafe — deployed to the PowerSync
+# Cloud instance's dashboard (Sync Streams editor), not consumed directly by
+# any app in this repo. Kept here for version control alongside the schema
+# it depends on. The dashboard's default config format is edition 3 ("Sync
+# Streams"), not the older bucket_definitions sync-rules format — this file
+# was rewritten to match what's actually deployed.
 #
-# Bucket parameters read cooperative_id from the custom JWT minted by
-# POST /api/powersync/token (artifacts/api-server/src/lib/powersyncJwt.ts)
-# after Express has validated the device binding — see plan §4/§5.
+# auth.parameter('cooperative_id') reads the cooperative_id claim from the
+# custom JWT minted by POST /api/powersync/token
+# (artifacts/api-server/src/lib/powersyncJwt.ts) after Express has validated
+# the device binding — see plan §4/§5.
+#
+# Column aliasing: each SELECT explicitly aliases every Postgres snake_case
+# column to the camelCase name field-pwa/src/powersync/schema.ts expects
+# (e.g. `cooperative_id AS "cooperativeId"`). PowerSync delivers whatever
+# column names the query produces verbatim to the client — there is no
+# automatic snake_case<->camelCase mapping — so an unaliased `SELECT *`
+# would silently land every field as NULL locally. Any column added to a
+# synced table's Drizzle schema must be added here too, with a matching
+# alias, and mirrored in field-pwa/src/powersync/schema.ts.
 #
 # Phase 1: producteurs + parcelles. Phase 2 adds stations (download-only —
 # created online by the admin, referenced by the offline livraison form)
-# and livraisons (uploaded offline like producteurs). Tables here must match
-# artifacts/field-pwa/src/powersync/schema.ts. Add more `data` queries
-# (or new bucket definitions) as later phases add synced tables — and
-# re-deploy to the PowerSync instance whenever this file changes.
-bucket_definitions:
+# and livraisons (uploaded offline like producteurs). Phase 4 adds
+# inspections. Re-deploy (paste into the PowerSync Cloud dashboard's Sync
+# Streams editor, Validate, then Deploy) whenever this file changes.
+config:
+  edition: 3
+
+streams:
   by_cooperative:
     # cooperative_id is a signed JWT claim, never a client-supplied
     # parameter — every synced table is scoped to the caller's own
     # cooperative, mirroring the server-side re-derivation in
     # artifacts/api-server/src/routes/sync.ts.
-    parameters: SELECT request.jwt() ->> 'cooperative_id' as cooperative_id
-    data:
-      - SELECT * FROM producteurs WHERE producteurs.cooperative_id = bucket.cooperative_id
-      - SELECT * FROM parcelles WHERE parcelles.cooperative_id = bucket.cooperative_id
-      - SELECT * FROM stations WHERE stations.cooperative_id = bucket.cooperative_id
-      - SELECT * FROM livraisons WHERE livraisons.cooperative_id = bucket.cooperative_id
-      - SELECT * FROM inspections WHERE inspections.cooperative_id = bucket.cooperative_id
+    auto_subscribe: true
+    queries:
+      - >
+        SELECT id, cooperative_id AS "cooperativeId", producer_code AS "producerCode", nom, prenom, sexe, age,
+        date_enregistrement AS "dateEnregistrement", culture_principale AS "culturePrincipale",
+        nombre_champs AS "nombreChamps", surface_biologique_ha AS "surfaceBiologiqueHa",
+        nombre_pieds AS "nombrePieds", estimation_rendement_kg_ha AS "estimationRendementKgHa",
+        statut_ics AS "statutIcs", groupement, village, territoire, province, agronome_id AS "agronomeId",
+        device_code AS "deviceCode", created_offline_at AS "createdOfflineAt"
+        FROM producteurs WHERE cooperative_id = auth.parameter('cooperative_id')
+      - >
+        SELECT id, producteur_id AS "producteurId", cooperative_id AS "cooperativeId", latitude, longitude,
+        altitude_m AS "altitudeM", superficie_ha AS "superficieHa"
+        FROM parcelles WHERE cooperative_id = auth.parameter('cooperative_id')
+      - >
+        SELECT id, cooperative_id AS "cooperativeId", code, nom, type, village, territoire, latitude, longitude,
+        altitude_m AS "altitudeM", capacite_tonnes_saison AS "capaciteTonnesSaison",
+        responsable_nom AS "responsableNom", responsable_telephone AS "responsableTelephone",
+        source_eau AS "sourceEau", certifications, produits, statut
+        FROM stations WHERE cooperative_id = auth.parameter('cooperative_id')
+      - >
+        SELECT id, cooperative_id AS "cooperativeId", producteur_id AS "producteurId", station_id AS "stationId",
+        bon_number AS "bonNumber", produit, poids_kg AS "poidsKg", prix_unitaire_cdf AS "prixUnitaireCdf",
+        date_livraison AS "dateLivraison", agronome_id AS "agronomeId", device_code AS "deviceCode",
+        created_offline_at AS "createdOfflineAt"
+        FROM livraisons WHERE cooperative_id = auth.parameter('cooperative_id')
+      - >
+        SELECT id, cooperative_id AS "cooperativeId", producteur_id AS "producteurId", parcelle_id AS "parcelleId",
+        date_inspection AS "dateInspection", etat_phytosanitaire AS "etatPhytosanitaire",
+        pratiques_entretien AS "pratiquesEntretien", fertilisation_sol AS "fertilisationSol",
+        gestion_eau AS "gestionEau", bonnes_pratiques AS "bonnesPratiques",
+        conformite_environnementale AS "conformiteEnvironnementale", conditions_travail AS "conditionsTravail",
+        score_global AS "scoreGlobal", conforme, recommandations, agronome_id AS "agronomeId",
+        device_code AS "deviceCode", created_offline_at AS "createdOfflineAt"
+        FROM inspections WHERE cooperative_id = auth.parameter('cooperative_id')
