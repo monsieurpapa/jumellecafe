@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase.js";
 import { fetchMe, fetchCooperatives, setActiveCooperativeId, type MeResponse, type Cooperative } from "./lib/api.js";
+import { Icon, type IconName } from "@jumelle/ui";
 import Login from "./screens/Login.js";
 import Dashboard from "./screens/Dashboard.js";
 import ProducteursList from "./screens/ProducteursList.js";
@@ -26,17 +27,17 @@ type Screen =
   | "cooperatives"
   | "appareils";
 
-const NAV: { key: Screen; label: string }[] = [
-  { key: "dashboard", label: "Tableau de bord" },
-  { key: "producteurs", label: "Producteurs" },
-  { key: "parcelles", label: "Parcelles GPS" },
-  { key: "stations", label: "Stations" },
-  { key: "livraisons", label: "Livraisons" },
-  { key: "lots", label: "Traçabilité" },
-  { key: "inspections", label: "Audit Interne" },
-  { key: "finance", label: "Finance" },
-  { key: "appareils", label: "Appareils" },
-  { key: "cooperatives", label: "Coopératives" },
+const NAV: { key: Screen; label: string; icon: IconName }[] = [
+  { key: "dashboard", label: "Tableau de bord", icon: "dashboard" },
+  { key: "producteurs", label: "Producteurs", icon: "producteur" },
+  { key: "parcelles", label: "Parcelles GPS", icon: "parcelle" },
+  { key: "stations", label: "Stations", icon: "station" },
+  { key: "livraisons", label: "Livraisons", icon: "livraison" },
+  { key: "lots", label: "Traçabilité", icon: "lot" },
+  { key: "inspections", label: "Audit Interne", icon: "inspection" },
+  { key: "finance", label: "Finance", icon: "finance" },
+  { key: "appareils", label: "Appareils", icon: "appareil" },
+  { key: "cooperatives", label: "Coopératives", icon: "cooperative" },
 ];
 
 export default function App() {
@@ -78,8 +79,8 @@ export default function App() {
 
   if (state === "loading" || (state === "ready" && !me)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-        <p className="text-neutral-500">Chargement…</p>
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <p className="text-stone-500 text-sm animate-pulse">Chargement…</p>
       </div>
     );
   }
@@ -98,28 +99,29 @@ export default function App() {
   const needsCooperativePick = isSuperAdmin && !activeCooperativeId && screen !== "cooperatives";
 
   return (
-    <div>
-      <nav className="flex items-center justify-between gap-2 border-b bg-white px-4">
+    <div className="min-h-screen bg-stone-50">
+      <nav className="flex items-center justify-between gap-2 border-b border-stone-200 bg-white px-4 overflow-x-auto">
         <div className="flex gap-1">
           {visibleNav.map((item) => (
             <button
               key={item.key}
-              className={`px-3 py-2 text-sm border-b-2 ${
+              className={`flex items-center gap-1.5 px-3 py-2.5 text-sm border-b-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-[-2px] ${
                 screen === item.key
                   ? "border-emerald-700 font-semibold text-emerald-800"
-                  : "border-transparent text-neutral-600"
+                  : "border-transparent text-stone-500 hover:text-stone-800"
               }`}
               onClick={() => setScreen(item.key)}
             >
+              <Icon name={item.icon} size={16} />
               {item.label}
             </button>
           ))}
         </div>
         {isSuperAdmin && (
-          <label className="text-sm text-neutral-600 py-2">
+          <label className="text-sm text-stone-600 py-2 whitespace-nowrap">
             Coopérative :{" "}
             <select
-              className="border rounded px-2 py-1 text-sm"
+              className="border border-stone-300 rounded-md px-2 py-1 text-sm"
               value={activeCooperativeId ?? ""}
               onChange={(e) => setActiveCooperativeIdState(e.target.value || null)}
             >
@@ -135,7 +137,7 @@ export default function App() {
       </nav>
       {needsCooperativePick ? (
         <div className="p-6">
-          <p className="text-neutral-500">Sélectionnez une coopérative ci-dessus pour continuer.</p>
+          <p className="text-stone-500">Sélectionnez une coopérative ci-dessus pour continuer.</p>
         </div>
       ) : (
         <>

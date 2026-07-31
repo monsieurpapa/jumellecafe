@@ -13,7 +13,7 @@ import {
   type Inspection,
   type Transaction,
 } from "../lib/api.js";
-import { ErrorBanner } from "@jumelle/ui";
+import { ErrorBanner, PageHeader, SkeletonTiles } from "@jumelle/ui";
 
 interface DashboardData {
   producteurs: Producteur[];
@@ -32,10 +32,10 @@ function StatTile({ label, value, accent }: { label: string; value: string; acce
         ? "text-amber-600"
         : accent === "red"
           ? "text-red-600"
-          : "";
+          : "text-stone-900";
   return (
-    <div className="border rounded p-3">
-      <p className="text-xs text-neutral-500">{label}</p>
+    <div className="border border-stone-200 shadow-sm rounded-lg p-3 bg-white">
+      <p className="text-xs text-stone-500">{label}</p>
       <p className={`font-semibold text-lg ${valueClass}`}>{value}</p>
     </div>
   );
@@ -86,9 +86,10 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-1">Tableau de bord</h1>
-      <p className="text-neutral-500 mb-4">{stats ? "Vue d'ensemble de la coopérative" : "Chargement…"}</p>
+      <PageHeader title="Tableau de bord" subtitle="Vue d'ensemble de la coopérative" />
       <ErrorBanner error={error} />
+
+      {!stats && <SkeletonTiles />}
 
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl">

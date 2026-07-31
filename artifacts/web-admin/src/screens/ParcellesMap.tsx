@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L, { type LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { fetchParcelles, type ParcelleWithProducteur } from "../lib/api.js";
-import { DetailPanel, ErrorBanner, EmptyState } from "@jumelle/ui";
+import { DetailPanel, ErrorBanner, EmptyState, PageHeader, Skeleton } from "@jumelle/ui";
 
 // Free, no-API-key satellite basemap — Esri World Imagery.
 const TILE_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
@@ -50,18 +50,24 @@ export default function ParcellesMap() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-1">Parcelles GPS</h1>
-      <p className="text-neutral-500 mb-4">
-        {parcelles ? `${parcelles.length} parcelle(s) géolocalisée(s)` : "Chargement…"}
-      </p>
+      <PageHeader
+        title="Parcelles GPS"
+        subtitle={parcelles ? `${parcelles.length} parcelle(s) géolocalisée(s)` : undefined}
+      />
       <ErrorBanner error={error} />
 
+      {!parcelles && <Skeleton className="h-[70vh] w-full" />}
+
       {parcelles && parcelles.length === 0 && (
-        <EmptyState message="Aucune parcelle géolocalisée pour le moment — les agronomes capturent la position GPS lors de l'enregistrement d'un producteur." />
+        <EmptyState
+          icon="parcelle"
+          message="Aucune parcelle géolocalisée pour le moment"
+          description="Les agronomes capturent la position GPS lors de l'enregistrement d'un producteur, depuis l'application terrain."
+        />
       )}
 
       {parcelles && parcelles.length > 0 && (
-        <div className="h-[70vh] rounded overflow-hidden border bg-neutral-900">
+        <div className="h-[70vh] rounded-lg overflow-hidden border border-stone-200 shadow-sm bg-stone-900">
           <MapContainer
             center={DEFAULT_CENTER}
             zoom={DEFAULT_ZOOM}

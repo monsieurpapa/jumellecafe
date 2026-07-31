@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchStations, createStation, updateStation, type Station, type CreateStationInput } from "../lib/api.js";
-import { Button, DetailPanel, ErrorBanner, SuccessBanner, EmptyState, formInputClass } from "@jumelle/ui";
+import { Badge, Button, DetailPanel, ErrorBanner, SuccessBanner, EmptyState, PageHeader, SkeletonRows, formInputClass } from "@jumelle/ui";
 
 interface FormState {
   code: string;
@@ -122,16 +122,20 @@ export default function StationsList({ canWrite }: { canWrite: boolean }) {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-xl font-semibold">Stations de lavage &amp; points de collecte</h1>
-        {canWrite && <Button onClick={() => setShowForm((v) => !v)}>{showForm ? "Annuler" : "+ Enregistrer une station"}</Button>}
-      </div>
-      <p className="text-neutral-500 mb-4">{stations ? `${stations.length} station(s)` : "Chargement…"}</p>
+      <PageHeader
+        title="Stations de lavage & points de collecte"
+        subtitle={stations ? `${stations.length} station(s)` : undefined}
+        action={
+          canWrite && (
+            <Button onClick={() => setShowForm((v) => !v)}>{showForm ? "Annuler" : "+ Enregistrer une station"}</Button>
+          )
+        }
+      />
       <ErrorBanner error={error} messages={ERROR_MESSAGES} />
       <SuccessBanner message={success} onDismiss={() => setSuccess(null)} />
 
       {canWrite && showForm && (
-        <div className="border rounded p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+        <div className="border border-stone-200 shadow-sm rounded-lg p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl bg-white">
           <label className="text-sm">
             Code *
             <input className={formInputClass} value={form.code} onChange={(e) => set("code", e.target.value)} placeholder="C-KALEHE-A" />
@@ -199,35 +203,43 @@ export default function StationsList({ canWrite }: { canWrite: boolean }) {
         </div>
       )}
 
-      {stations && stations.length === 0 && <EmptyState message="Aucune station enregistrée pour le moment." />}
+      {!stations && <SkeletonRows cols={7} />}
+
+      {stations && stations.length === 0 && (
+        <EmptyState
+          icon="station"
+          message="Aucune station enregistrée pour le moment"
+          description="Enregistrez une station de lavage ou un point de collecte pour commencer à y rattacher des livraisons."
+        />
+      )}
 
       {stations && stations.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-stone-200 shadow-sm rounded-lg bg-white">
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Code</th>
-                <th className="py-2 pr-4">Nom</th>
-                <th className="py-2 pr-4">Type</th>
-                <th className="py-2 pr-4">Village</th>
-                <th className="py-2 pr-4">Territoire</th>
-                <th className="py-2 pr-4">Capacité (T/saison)</th>
-                <th className="py-2 pr-4">Responsable</th>
-                <th className="py-2 pr-4">Statut</th>
-                <th className="py-2 pr-4">Détails</th>
+              <tr className="text-left border-b border-stone-200 bg-stone-50">
+                <th className="py-2 px-4">Code</th>
+                <th className="py-2 px-4">Nom</th>
+                <th className="py-2 px-4">Type</th>
+                <th className="py-2 px-4">Village</th>
+                <th className="py-2 px-4">Territoire</th>
+                <th className="py-2 px-4">Capacité (T/saison)</th>
+                <th className="py-2 px-4">Responsable</th>
+                <th className="py-2 px-4">Statut</th>
+                <th className="py-2 px-4">Détails</th>
               </tr>
             </thead>
             <tbody>
               {stations.map((s) => (
-                <tr key={s.id} className="border-b">
-                  <td className="py-2 pr-4 font-mono text-xs">{s.code}</td>
-                  <td className="py-2 pr-4">{s.nom}</td>
-                  <td className="py-2 pr-4">{s.type === "lavage" ? "Lavage" : "Collecte"}</td>
-                  <td className="py-2 pr-4">{s.village ?? "—"}</td>
-                  <td className="py-2 pr-4">{s.territoire ?? "—"}</td>
-                  <td className="py-2 pr-4">{s.capaciteTonnesSaison ?? "—"}</td>
-                  <td className="py-2 pr-4">{s.responsableNom ?? "—"}</td>
-                  <td className="py-2 pr-4">
+                <tr key={s.id} className="border-b border-stone-100 last:border-0 hover:bg-stone-50 transition-colors">
+                  <td className="py-2 px-4 font-mono text-xs">{s.code}</td>
+                  <td className="py-2 px-4">{s.nom}</td>
+                  <td className="py-2 px-4">{s.type === "lavage" ? "Lavage" : "Collecte"}</td>
+                  <td className="py-2 px-4">{s.village ?? "—"}</td>
+                  <td className="py-2 px-4">{s.territoire ?? "—"}</td>
+                  <td className="py-2 px-4">{s.capaciteTonnesSaison ?? "—"}</td>
+                  <td className="py-2 px-4">{s.responsableNom ?? "—"}</td>
+                  <td className="py-2 px-4">
                     {canWrite ? (
                       pendingChange?.stationId === s.id ? (
                         <span className="inline-flex items-center gap-2 text-xs">
@@ -239,13 +251,13 @@ export default function StationsList({ canWrite }: { canWrite: boolean }) {
                           >
                             {applyingStatutId === s.id ? "…" : "Confirmer"}
                           </button>
-                          <button className="text-neutral-500 underline" onClick={() => setPendingChange(null)}>
+                          <button className="text-stone-500 underline" onClick={() => setPendingChange(null)}>
                             Annuler
                           </button>
                         </span>
                       ) : (
                         <select
-                          className="border rounded px-2 py-1 text-xs"
+                          className="border border-stone-300 rounded-md px-2 py-1 text-xs"
                           value={s.statut}
                           onChange={(e) =>
                             setPendingChange({ stationId: s.id, statut: e.target.value as Station["statut"] })
@@ -259,11 +271,16 @@ export default function StationsList({ canWrite }: { canWrite: boolean }) {
                         </select>
                       )
                     ) : (
-                      STATUT_LABELS[s.statut]
+                      <Badge variant={s.statut === "active" ? "success" : s.statut === "partielle" ? "warning" : "neutral"}>
+                        {STATUT_LABELS[s.statut]}
+                      </Badge>
                     )}
                   </td>
-                  <td className="py-2 pr-4">
-                    <button className="text-emerald-700 underline" onClick={() => setDetail(s)}>
+                  <td className="py-2 px-4">
+                    <button
+                      className="text-emerald-700 hover:text-emerald-900 underline transition-colors"
+                      onClick={() => setDetail(s)}
+                    >
                       Voir
                     </button>
                   </td>

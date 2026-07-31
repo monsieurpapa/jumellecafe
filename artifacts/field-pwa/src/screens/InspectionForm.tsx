@@ -147,8 +147,8 @@ export default function InspectionForm() {
         <div className="rounded-full bg-emerald-100 text-emerald-700 w-12 h-12 flex items-center justify-center text-2xl">
           ✓
         </div>
-        <h2 className="text-lg font-semibold">Inspection enregistrée</h2>
-        <p className="text-neutral-600">
+        <h2 className="text-lg font-semibold tracking-tight text-stone-900">Inspection enregistrée</h2>
+        <p className="text-stone-600">
           Score {justSubmitted.score}/100 — {justSubmitted.conforme ? "Conforme" : "Non conforme"}
         </p>
         <Button size="md" onClick={startNew}>
@@ -160,7 +160,7 @@ export default function InspectionForm() {
 
   return (
     <div className="max-w-md mx-auto p-6 flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">Inspection de terrain</h2>
+      <h2 className="text-lg font-semibold tracking-tight text-stone-900">Inspection de terrain</h2>
 
       <label className={fieldClass}>
         Producteur à inspecter
@@ -199,8 +199,8 @@ export default function InspectionForm() {
       </label>
 
       <div>
-        <h3 className="font-medium mb-0">Grille d'évaluation agronomique</h3>
-        <p className="text-neutral-500 text-sm mt-0">Notez chaque critère de 0 (critique) à 5 (excellent)</p>
+        <h3 className="font-medium text-stone-800 mb-0">Grille d'évaluation agronomique</h3>
+        <p className="text-stone-500 text-sm mt-0">Notez chaque critère de 0 (critique) à 5 (excellent)</p>
       </div>
 
       {INSPECTION_CRITERES.map((critere) => (
@@ -214,7 +214,7 @@ export default function InspectionForm() {
             value={scores[critere.key]}
             onChange={(e) => setScore(critere.key, Number(e.target.value))}
           />
-          <span className="flex justify-between text-neutral-500 text-xs">
+          <span className="flex justify-between text-stone-500 text-xs">
             <span>0 — Critique</span>
             <strong className="text-emerald-700">{scores[critere.key]}</strong>
             <span>5 — Excellent</span>
@@ -223,7 +223,7 @@ export default function InspectionForm() {
       ))}
 
       <div
-        className={`p-3 rounded flex justify-between items-center ${conforme ? "bg-emerald-50" : "bg-red-50"}`}
+        className={`p-3 rounded-md border flex justify-between items-center ${conforme ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}
       >
         <span>Score global calculé</span>
         <strong className={`text-lg ${conforme ? "text-emerald-700" : "text-red-700"}`}>

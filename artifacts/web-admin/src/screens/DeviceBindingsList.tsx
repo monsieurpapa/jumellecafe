@@ -1,16 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchDeviceBindings, revokeDeviceBinding, type DeviceBinding } from "../lib/api.js";
-import { ErrorBanner, SuccessBanner, EmptyState } from "@jumelle/ui";
-
-const CONFIRM_TIMEOUT_MS = 4000;
+import { Badge, ConfirmButton, ErrorBanner, SuccessBanner, EmptyState, PageHeader, SkeletonRows } from "@jumelle/ui";
 
 export default function DeviceBindingsList({ canWrite }: { canWrite: boolean }) {
   const [bindings, setBindings] = useState<DeviceBinding[] | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const [revokingId, setRevokingId] = useState<string | null>(null);
-  const confirmTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function load() {
     fetchDeviceBindings()
@@ -19,20 +14,8 @@ export default function DeviceBindingsList({ canWrite }: { canWrite: boolean }) 
   }
 
   useEffect(load, []);
-  useEffect(() => () => {
-    if (confirmTimeout.current) clearTimeout(confirmTimeout.current);
-  }, []);
-
-  function askConfirm(id: string) {
-    setConfirmingId(id);
-    if (confirmTimeout.current) clearTimeout(confirmTimeout.current);
-    confirmTimeout.current = setTimeout(() => setConfirmingId(null), CONFIRM_TIMEOUT_MS);
-  }
 
   async function handleRevoke(binding: DeviceBinding) {
-    if (confirmTimeout.current) clearTimeout(confirmTimeout.current);
-    setConfirmingId(null);
-    setRevokingId(binding.id);
     setError(null);
     try {
       await revokeDeviceBinding(binding.id);
@@ -40,8 +23,6 @@ export default function DeviceBindingsList({ canWrite }: { canWrite: boolean }) 
       load();
     } catch (err) {
       setError(err);
-    } finally {
-      setRevokingId(null);
     }
   }
 
@@ -49,67 +30,52 @@ export default function DeviceBindingsList({ canWrite }: { canWrite: boolean }) 
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-1">Appareils des agronomes</h1>
-      <p className="text-neutral-500 mb-4">
-        {bindings ? `${bindings.length} appareil(s)` : "Chargement…"}
-      </p>
+      <PageHeader title="Appareils des agronomes" subtitle={bindings ? `${bindings.length} appareil(s)` : undefined} />
       <ErrorBanner error={error} />
       <SuccessBanner message={success} onDismiss={() => setSuccess(null)} />
 
+      {!bindings && <SkeletonRows cols={6} />}
+
       {bindings && bindings.length === 0 && (
-        <EmptyState message="Aucun appareil enregistré pour le moment." />
+        <EmptyState
+          icon="appareil"
+          message="Aucun appareil enregistré pour le moment"
+          description="Un agronome se voit assigner un appareil à sa première connexion depuis field-pwa."
+        />
       )}
 
       {bindings && bindings.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-stone-200 shadow-sm rounded-lg bg-white">
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Agronome</th>
-                <th className="py-2 pr-4">Code appareil</th>
-                <th className="py-2 pr-4">Libellé</th>
-                <th className="py-2 pr-4">Statut</th>
-                <th className="py-2 pr-4">Lié le</th>
-                <th className="py-2 pr-4">Dernière activité</th>
-                {canWrite && <th className="py-2 pr-4">Actions</th>}
+              <tr className="text-left border-b border-stone-200 bg-stone-50">
+                <th className="py-2 px-4">Agronome</th>
+                <th className="py-2 px-4">Code appareil</th>
+                <th className="py-2 px-4">Libellé</th>
+                <th className="py-2 px-4">Statut</th>
+                <th className="py-2 px-4">Lié le</th>
+                <th className="py-2 px-4">Dernière activité</th>
+                {canWrite && <th className="py-2 px-4">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {bindings.map((b) => (
-                <tr key={b.id} className="border-b">
-                  <td className="py-2 pr-4">{b.agronomeNom ?? "—"}</td>
-                  <td className="py-2 pr-4 font-mono text-xs">{b.deviceCode}</td>
-                  <td className="py-2 pr-4">{b.deviceLabel ?? "—"}</td>
-                  <td className="py-2 pr-4">
-                    {b.status === "active" ? (
-                      <span className="text-emerald-700">Actif</span>
-                    ) : (
-                      <span className="text-neutral-500">Révoqué</span>
-                    )}
+                <tr key={b.id} className="border-b border-stone-100 last:border-0 hover:bg-stone-50 transition-colors">
+                  <td className="py-2 px-4">{b.agronomeNom ?? "—"}</td>
+                  <td className="py-2 px-4 font-mono text-xs">{b.deviceCode}</td>
+                  <td className="py-2 px-4">{b.deviceLabel ?? "—"}</td>
+                  <td className="py-2 px-4">
+                    <Badge variant={b.status === "active" ? "success" : "neutral"}>
+                      {b.status === "active" ? "Actif" : "Révoqué"}
+                    </Badge>
                   </td>
-                  <td className="py-2 pr-4">{fmt(b.boundAt)}</td>
-                  <td className="py-2 pr-4">{fmt(b.lastSeenAt)}</td>
+                  <td className="py-2 px-4">{fmt(b.boundAt)}</td>
+                  <td className="py-2 px-4">{fmt(b.lastSeenAt)}</td>
                   {canWrite && (
-                    <td className="py-2 pr-4">
-                      {b.status === "active" &&
-                        (confirmingId === b.id ? (
-                          <span className="inline-flex items-center gap-2">
-                            <button
-                              className="text-red-600 underline disabled:opacity-50"
-                              disabled={revokingId === b.id}
-                              onClick={() => handleRevoke(b)}
-                            >
-                              {revokingId === b.id ? "Révocation…" : "Confirmer ?"}
-                            </button>
-                            <button className="text-neutral-500 underline" onClick={() => setConfirmingId(null)}>
-                              Annuler
-                            </button>
-                          </span>
-                        ) : (
-                          <button className="text-neutral-600 underline" onClick={() => askConfirm(b.id)}>
-                            Révoquer
-                          </button>
-                        ))}
+                    <td className="py-2 px-4">
+                      {b.status === "active" && (
+                        <ConfirmButton label="Révoquer" onConfirm={() => handleRevoke(b)} />
+                      )}
                     </td>
                   )}
                 </tr>

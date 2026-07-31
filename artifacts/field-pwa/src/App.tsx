@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { PowerSyncContext, useStatus } from "@powersync/react";
+import { Icon, type IconName } from "@jumelle/ui";
 import { supabase } from "./lib/supabase.js";
 import { claimDevice, fetchMe, ApiError } from "./lib/api.js";
 import { getOrCreateDeviceId } from "./lib/deviceId.js";
@@ -103,8 +104,8 @@ export default function App() {
 
   if (state === "loading" || state === "claiming") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Connexion en cours…</p>
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <p className="text-stone-500 text-sm animate-pulse">Connexion en cours…</p>
       </div>
     );
   }
@@ -119,30 +120,35 @@ export default function App() {
 
   if (state === "error") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <p className="text-red-600 text-center">{errorMessage}</p>
+      <div className="min-h-screen flex items-center justify-center px-6 bg-stone-50">
+        <p className="text-red-700 bg-red-50 border border-red-200 rounded-md px-4 py-3 text-center">
+          {errorMessage}
+        </p>
       </div>
     );
   }
 
+  const TABS: { key: Screen; label: string; icon: IconName }[] = [
+    { key: "producteur", label: "Producteur", icon: "producteur" },
+    { key: "livraison", label: "Livraison", icon: "livraison" },
+    { key: "inspection", label: "Inspection", icon: "inspection" },
+  ];
+
   const tabClass = (active: boolean) =>
-    `flex-1 py-2.5 text-sm border-b-[3px] ${
-      active ? "border-emerald-700 font-semibold" : "border-transparent text-neutral-600"
+    `flex-1 flex items-center justify-center gap-1.5 py-3 text-sm border-b-[3px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-[-2px] ${
+      active ? "border-emerald-700 font-semibold text-emerald-800" : "border-transparent text-stone-500"
     }`;
 
   return (
     <PowerSyncContext.Provider value={powerSyncDb}>
-      <div>
-        <nav className="flex items-center border-b">
-          <button className={tabClass(screen === "producteur")} onClick={() => setScreen("producteur")}>
-            Producteur
-          </button>
-          <button className={tabClass(screen === "livraison")} onClick={() => setScreen("livraison")}>
-            Livraison
-          </button>
-          <button className={tabClass(screen === "inspection")} onClick={() => setScreen("inspection")}>
-            Inspection
-          </button>
+      <div className="min-h-screen bg-stone-50">
+        <nav className="flex items-center border-b border-stone-200 bg-white">
+          {TABS.map((tab) => (
+            <button key={tab.key} className={tabClass(screen === tab.key)} onClick={() => setScreen(tab.key)}>
+              <Icon name={tab.icon} size={16} />
+              {tab.label}
+            </button>
+          ))}
           <div className="px-3">
             <SyncStatusBadge />
           </div>

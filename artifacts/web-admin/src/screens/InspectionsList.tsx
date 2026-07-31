@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchInspections, fetchProducteurs, type Inspection, type Producteur } from "../lib/api.js";
-import { DetailPanel, ErrorBanner, EmptyState } from "@jumelle/ui";
+import { Badge, DetailPanel, ErrorBanner, EmptyState, PageHeader, SkeletonRows } from "@jumelle/ui";
 
 export default function InspectionsList() {
   const [inspections, setInspections] = useState<Inspection[] | null>(null);
@@ -23,51 +23,60 @@ export default function InspectionsList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-1">Audit Interne — Inspections de terrain</h1>
-      <p className="text-neutral-500 mb-4">
-        {inspections
-          ? `${inspections.length} inspection(s) — ${conformes} conforme(s), ${inspections.length - conformes} non conforme(s)`
-          : "Chargement…"}
-      </p>
+      <PageHeader
+        title="Audit Interne — Inspections de terrain"
+        subtitle={
+          inspections
+            ? `${inspections.length} inspection(s) — ${conformes} conforme(s), ${inspections.length - conformes} non conforme(s)`
+            : undefined
+        }
+      />
       <ErrorBanner error={error} />
 
+      {!inspections && <SkeletonRows cols={5} />}
+
       {inspections && inspections.length === 0 && (
-        <EmptyState message="Aucune inspection pour le moment." />
+        <EmptyState
+          icon="inspection"
+          message="Aucune inspection pour le moment"
+          description="Les agronomes réalisent les audits internes depuis l'application terrain, hors ligne."
+        />
       )}
 
       {inspections && inspections.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-stone-200 shadow-sm rounded-lg bg-white">
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Date</th>
-                <th className="py-2 pr-4">Producteur</th>
-                <th className="py-2 pr-4">Score</th>
-                <th className="py-2 pr-4">Verdict</th>
-                <th className="py-2 pr-4">Appareil</th>
-                <th className="py-2 pr-4">Détails</th>
+              <tr className="text-left border-b border-stone-200 bg-stone-50">
+                <th className="py-2 px-4">Date</th>
+                <th className="py-2 px-4">Producteur</th>
+                <th className="py-2 px-4">Score</th>
+                <th className="py-2 px-4">Verdict</th>
+                <th className="py-2 px-4">Appareil</th>
+                <th className="py-2 px-4">Détails</th>
               </tr>
             </thead>
             <tbody>
               {inspections.map((insp) => {
                 const producteur = producteurById.get(insp.producteurId);
                 return (
-                  <tr key={insp.id} className="border-b">
-                    <td className="py-2 pr-4">{insp.dateInspection}</td>
-                    <td className="py-2 pr-4">
+                  <tr key={insp.id} className="border-b border-stone-100 last:border-0 hover:bg-stone-50 transition-colors">
+                    <td className="py-2 px-4">{insp.dateInspection}</td>
+                    <td className="py-2 px-4">
                       {producteur ? `${producteur.nom} ${producteur.prenom}` : insp.producteurId.slice(0, 8)}
                     </td>
-                    <td className="py-2 pr-4 font-semibold">{insp.scoreGlobal}/100</td>
-                    <td className="py-2 pr-4">
-                      {insp.conforme ? (
-                        <span className="text-emerald-700">✔ Conforme</span>
-                      ) : (
-                        <span className="text-red-600">Non conforme</span>
-                      )}
+                    <td className="py-2 px-4 font-semibold">{insp.scoreGlobal}/100</td>
+                    <td className="py-2 px-4">
+                      <Badge variant={insp.conforme ? "success" : "danger"}>
+                        {insp.conforme ? "✔ Conforme" : "Non conforme"}
+                      </Badge>
                     </td>
-                    <td className="py-2 pr-4 font-mono text-xs">{insp.deviceCode}</td>
-                    <td className="py-2 pr-4">
-                      <button className="text-emerald-700 underline" onClick={() => setDetail(insp)}>
+                    <td className="py-2 px-4 font-mono text-xs">{insp.deviceCode}</td>
+                    <td className="py-2 px-4">
+                      <button
+                        className="text-emerald-700 hover:text-emerald-900 underline transition-colors"
+                        onClick={() => setDetail(insp)}
+                      >
                         Voir
                       </button>
                     </td>
@@ -90,11 +99,9 @@ export default function InspectionsList() {
           subtitle={
             <>
               Score : <span className="font-semibold">{detail.scoreGlobal}/100</span> —{" "}
-              {detail.conforme ? (
-                <span className="text-emerald-700">✔ Conforme</span>
-              ) : (
-                <span className="text-red-600">Non conforme</span>
-              )}
+              <Badge variant={detail.conforme ? "success" : "danger"}>
+                {detail.conforme ? "✔ Conforme" : "Non conforme"}
+              </Badge>
             </>
           }
           onClose={() => setDetail(null)}
@@ -108,7 +115,7 @@ export default function InspectionsList() {
             <span>Conformité environnementale : {detail.conformiteEnvironnementale}/5</span>
             <span>Conditions de travail : {detail.conditionsTravail}/5</span>
           </div>
-          <p className="text-neutral-700">
+          <p className="text-stone-700">
             <span className="font-medium">Recommandations :</span> {detail.recommandations}
           </p>
         </DetailPanel>

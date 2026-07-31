@@ -47,6 +47,30 @@ const EMPTY_FORM: FormState = {
 
 const fieldClass = "flex flex-col gap-1 text-sm";
 
+const STEP_LABELS = ["Identité", "Exploitation", "Parcelle GPS"];
+
+function StepProgress({ step }: { step: Step }) {
+  return (
+    <div className="flex items-center gap-2 mb-1">
+      {STEP_LABELS.map((label, i) => {
+        const idx = (i + 1) as Step;
+        const active = idx === step;
+        const done = idx < step;
+        return (
+          <div key={label} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              className={`h-1.5 w-full rounded-full ${done || active ? "bg-emerald-600" : "bg-stone-200"}`}
+            />
+            <span className={`text-[11px] ${active ? "font-semibold text-emerald-700" : "text-stone-400"}`}>
+              {label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ProducteurForm() {
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -194,8 +218,8 @@ export default function ProducteurForm() {
         <div className="rounded-full bg-emerald-100 text-emerald-700 w-12 h-12 flex items-center justify-center text-2xl">
           ✓
         </div>
-        <h2 className="text-lg font-semibold">Producteur enregistré</h2>
-        <p className="text-neutral-600">
+        <h2 className="text-lg font-semibold tracking-tight text-stone-900">Producteur enregistré</h2>
+        <p className="text-stone-600">
           Code producteur : <span className="font-mono">{justSubmitted}</span>
         </p>
         <Button size="md" onClick={startNew}>
@@ -207,12 +231,12 @@ export default function ProducteurForm() {
 
   return (
     <div className="max-w-md mx-auto p-6 flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">Enregistrer un producteur</h2>
-      <p className="text-neutral-500 text-sm">Étape {step} / 3</p>
+      <h2 className="text-lg font-semibold tracking-tight text-stone-900">Enregistrer un producteur</h2>
+      <StepProgress step={step} />
 
       {step === 1 && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium">1. Identité du membre</h3>
+          <h3 className="font-medium text-stone-800">1. Identité du membre</h3>
           <label className={fieldClass}>
             Nom
             <input className={formInputClass} value={form.nom} onChange={(e) => set("nom", e.target.value)} />
@@ -250,7 +274,7 @@ export default function ProducteurForm() {
 
       {step === 2 && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium">2. Exploitation agricole</h3>
+          <h3 className="font-medium text-stone-800">2. Exploitation agricole</h3>
           <label className={fieldClass}>
             Culture principale
             <select
@@ -322,7 +346,7 @@ export default function ProducteurForm() {
             />
           </label>
           <div className="flex gap-2">
-            <Button size="md" className="bg-neutral-500" onClick={() => setStep(1)}>
+            <Button size="md" className="bg-stone-500" onClick={() => setStep(1)}>
               ← Retour
             </Button>
             <Button
@@ -338,7 +362,7 @@ export default function ProducteurForm() {
 
       {step === 3 && (
         <div className="flex flex-col gap-3">
-          <h3 className="font-medium">3. Localisation de la parcelle</h3>
+          <h3 className="font-medium text-stone-800">3. Localisation de la parcelle</h3>
           <label className={fieldClass}>
             Village
             <input
@@ -363,16 +387,16 @@ export default function ProducteurForm() {
               onChange={(e) => set("province", e.target.value)}
             />
           </label>
-          <Button size="md" className="bg-neutral-600" type="button" onClick={captureGps} disabled={locating}>
+          <Button size="md" className="bg-stone-600" type="button" onClick={captureGps} disabled={locating}>
             {locating ? "Localisation en cours…" : "📍 Capturer la position GPS"}
           </Button>
           {form.latitude && form.longitude && (
-            <p className="text-neutral-500 text-sm">
+            <p className="text-stone-500 text-sm">
               Latitude : {form.latitude} — Longitude : {form.longitude}
             </p>
           )}
           <div className="flex gap-2">
-            <Button size="md" className="bg-neutral-500" onClick={() => setStep(2)}>
+            <Button size="md" className="bg-stone-500" onClick={() => setStep(2)}>
               ← Retour
             </Button>
             <Button size="md" onClick={handleSubmit} disabled={submitting || !form.village || !form.territoire}>

@@ -60,6 +60,7 @@ export interface Cooperative {
   contactEmail: string | null;
   contactPhone: string | null;
   eudrBaselineUploaded: boolean;
+  actif: boolean;
   createdAt: string;
 }
 
@@ -84,6 +85,24 @@ export function createCooperative(
 ): Promise<{ cooperative: Cooperative; adminProfile: { userId: string; role: string } }> {
   return authedFetch("/api/cooperatives", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
+export interface UpdateCooperativeInput {
+  nom?: string;
+  province?: string;
+  territoire?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  eudrBaselineUploaded?: boolean;
+  actif?: boolean;
+}
+
+export function updateCooperative(cooperativeId: string, input: UpdateCooperativeInput): Promise<Cooperative> {
+  return authedFetch(`/api/cooperatives/${encodeURIComponent(cooperativeId)}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
@@ -249,6 +268,21 @@ export function createTransaction(input: CreateTransactionInput): Promise<Transa
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
+}
+
+export function updateTransaction(
+  transactionId: string,
+  input: Partial<CreateTransactionInput>,
+): Promise<Transaction> {
+  return authedFetch(`/api/transactions/${encodeURIComponent(transactionId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteTransaction(transactionId: string): Promise<void> {
+  return authedFetch(`/api/transactions/${encodeURIComponent(transactionId)}`, { method: "DELETE" });
 }
 
 export interface Lot {

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, cooperativesTable, userProfilesTable, insertCooperativeSchema } from "@jumelle/db";
+import { db, cooperativesTable, userProfilesTable, insertCooperativeSchema, cooperativeUpdateSchema } from "@jumelle/db";
 import { requireAuth, requireRole } from "../middlewares/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
 
@@ -99,6 +99,30 @@ router.post("/cooperatives", requireAuth, requireRole("super_admin"), async (req
     .returning();
 
   res.status(201).json({ cooperative, adminProfile: profile });
+});
+
+/**
+ * PATCH /api/cooperatives/:id — Super Admin only. Edits coop details and/or
+ * toggles `actif` (deactivate/reactivate) — `code` stays immutable after
+ * onboarding, same rule PATCH /api/stations/:id already applies.
+ */
+router.patch("/cooperatives/:id", requireAuth, requireRole("super_admin"), async (req, res) => {
+  const parsed = cooperativeUpdateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "invalid_payload", details: parsed.error.flatten() });
+    return;
+  }
+  const cooperativeId = String(req.params["id"]);
+  const [updated] = await db
+    .update(cooperativesTable)
+    .set(parsed.data)
+    .where(eq(cooperativesTable.id, cooperativeId))
+    .returning();
+  if (!updated) {
+    res.status(404).json({ error: "not_found" });
+    return;
+  }
+  res.status(200).json(updated);
 });
 
 export default router;

@@ -11,7 +11,7 @@ import {
   type Station,
   type Livraison,
 } from "../lib/api.js";
-import { Button, ConfirmButton, DetailPanel, ErrorBanner, SuccessBanner, EmptyState, formInputClass } from "@jumelle/ui";
+import { Badge, Button, ConfirmButton, DetailPanel, ErrorBanner, SuccessBanner, EmptyState, PageHeader, SkeletonRows, formInputClass } from "@jumelle/ui";
 
 const STATUT_LABELS: Record<Lot["statut"], string> = {
   en_traitement: "En traitement",
@@ -136,18 +136,20 @@ export default function LotsList({ canWrite }: { canWrite: boolean }) {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-xl font-semibold">Traçabilité — Lots</h1>
-        {canWrite && (
-          <Button onClick={() => setShowForm((v) => !v)}>{showForm ? "Annuler" : "+ Constituer un lot"}</Button>
-        )}
-      </div>
-      <p className="text-neutral-500 mb-4">{lots ? `${lots.length} lot(s)` : "Chargement…"}</p>
+      <PageHeader
+        title="Traçabilité — Lots"
+        subtitle={lots ? `${lots.length} lot(s)` : undefined}
+        action={
+          canWrite && (
+            <Button onClick={() => setShowForm((v) => !v)}>{showForm ? "Annuler" : "+ Constituer un lot"}</Button>
+          )
+        }
+      />
       <ErrorBanner error={error} messages={ERROR_MESSAGES} />
       <SuccessBanner message={success} onDismiss={() => setSuccess(null)} />
 
       {canWrite && showForm && (
-        <div className="border rounded p-4 mb-6 max-w-3xl">
+        <div className="border border-stone-200 shadow-sm rounded-lg p-4 mb-6 max-w-3xl bg-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <label className="text-sm">
               Station *
@@ -186,9 +188,9 @@ export default function LotsList({ canWrite }: { canWrite: boolean }) {
                 {selectedKg.toLocaleString("fr-FR")} kg
               </p>
               {candidates.length === 0 && (
-                <p className="text-sm text-neutral-500 mb-2">Aucune livraison non-lotie pour cette station.</p>
+                <p className="text-sm text-stone-500 mb-2">Aucune livraison non-lotie pour cette station.</p>
               )}
-              <div className="max-h-56 overflow-y-auto border rounded mb-3">
+              <div className="max-h-56 overflow-y-auto border border-stone-200 rounded-md mb-3">
                 {candidates.map((l) => (
                   <label key={l.id} className="flex items-center gap-2 px-3 py-1.5 border-b text-sm cursor-pointer">
                     <input type="checkbox" checked={selected.has(l.id)} onChange={() => toggle(l.id)} />
@@ -212,43 +214,56 @@ export default function LotsList({ canWrite }: { canWrite: boolean }) {
         </div>
       )}
 
-      {lots && lots.length === 0 && <EmptyState message="Aucun lot constitué pour le moment." />}
+      {!lots && <SkeletonRows cols={7} />}
+
+      {lots && lots.length === 0 && (
+        <EmptyState
+          icon="lot"
+          message="Aucun lot constitué pour le moment"
+          description="Constituez un lot à partir des livraisons non-loties d'une station pour démarrer la traçabilité export."
+        />
+      )}
 
       {lots && lots.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-stone-200 shadow-sm rounded-lg bg-white">
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Lot</th>
-                <th className="py-2 pr-4">Culture</th>
-                <th className="py-2 pr-4">Poids (kg)</th>
-                <th className="py-2 pr-4">Station</th>
-                <th className="py-2 pr-4">Producteurs</th>
-                <th className="py-2 pr-4">EUDR</th>
-                <th className="py-2 pr-4">Acheteur</th>
-                <th className="py-2 pr-4">Statut</th>
-                <th className="py-2 pr-4">Actions</th>
+              <tr className="text-left border-b border-stone-200 bg-stone-50">
+                <th className="py-2 px-4">Lot</th>
+                <th className="py-2 px-4">Culture</th>
+                <th className="py-2 px-4">Poids (kg)</th>
+                <th className="py-2 px-4">Station</th>
+                <th className="py-2 px-4">Producteurs</th>
+                <th className="py-2 px-4">EUDR</th>
+                <th className="py-2 px-4">Acheteur</th>
+                <th className="py-2 px-4">Statut</th>
+                <th className="py-2 px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
               {lots.map((lot) => (
-                <tr key={lot.id} className="border-b">
-                  <td className="py-2 pr-4 font-mono text-xs">{lot.code}</td>
-                  <td className="py-2 pr-4">{lot.culture}</td>
-                  <td className="py-2 pr-4">{lot.poidsKg.toLocaleString("fr-FR")}</td>
-                  <td className="py-2 pr-4">{stationById.get(lot.stationId)?.nom ?? "—"}</td>
-                  <td className="py-2 pr-4">{lot.producteursCount} prod.</td>
-                  <td className="py-2 pr-4">
-                    {lot.eudrConforme ? (
-                      <span className="text-emerald-700">✔ Conforme</span>
-                    ) : (
-                      <span className="text-red-600">Non conforme</span>
-                    )}
+                <tr key={lot.id} className="border-b border-stone-100 last:border-0 hover:bg-stone-50 transition-colors">
+                  <td className="py-2 px-4 font-mono text-xs">{lot.code}</td>
+                  <td className="py-2 px-4">{lot.culture}</td>
+                  <td className="py-2 px-4">{lot.poidsKg.toLocaleString("fr-FR")}</td>
+                  <td className="py-2 px-4">{stationById.get(lot.stationId)?.nom ?? "—"}</td>
+                  <td className="py-2 px-4">{lot.producteursCount} prod.</td>
+                  <td className="py-2 px-4">
+                    <Badge variant={lot.eudrConforme ? "success" : "danger"}>
+                      {lot.eudrConforme ? "✔ Conforme" : "Non conforme"}
+                    </Badge>
                   </td>
-                  <td className="py-2 pr-4">{lot.acheteur ?? "—"}</td>
-                  <td className="py-2 pr-4">{STATUT_LABELS[lot.statut]}</td>
-                  <td className="py-2 pr-4">
-                    <button className="text-emerald-700 underline mr-3" onClick={() => openDetail(lot.id)}>
+                  <td className="py-2 px-4">{lot.acheteur ?? "—"}</td>
+                  <td className="py-2 px-4">
+                    <Badge variant={lot.statut === "exporte" ? "success" : lot.statut === "pret_export" ? "warning" : "neutral"}>
+                      {STATUT_LABELS[lot.statut]}
+                    </Badge>
+                  </td>
+                  <td className="py-2 px-4">
+                    <button
+                      className="text-emerald-700 hover:text-emerald-900 underline transition-colors mr-3"
+                      onClick={() => openDetail(lot.id)}
+                    >
                       Voir
                     </button>
                     {canWrite && lot.statut !== "exporte" && (
@@ -284,7 +299,7 @@ export default function LotsList({ canWrite }: { canWrite: boolean }) {
         >
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
+              <tr className="text-left border-b border-stone-200">
                 <th className="py-1.5 pr-4">Bon N°</th>
                 <th className="py-1.5 pr-4">Date</th>
                 <th className="py-1.5 pr-4">Producteur</th>
@@ -300,7 +315,7 @@ export default function LotsList({ canWrite }: { canWrite: boolean }) {
                   .filter((p) => p.producteurId === producteur.id)
                   .map((p) => `${p.latitude.toFixed(4)}, ${p.longitude.toFixed(4)}`);
                 return (
-                  <tr key={livraison.id} className="border-b">
+                  <tr key={livraison.id} className="border-b border-stone-100 last:border-0">
                     <td className="py-1.5 pr-4 font-mono text-xs">{livraison.bonNumber}</td>
                     <td className="py-1.5 pr-4">{livraison.dateLivraison}</td>
                     <td className="py-1.5 pr-4">

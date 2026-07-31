@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchLivraisons, fetchStations, fetchProducteurs, type Livraison, type Station, type Producteur } from "../lib/api.js";
-import { ErrorBanner, EmptyState } from "@jumelle/ui";
+import { ErrorBanner, EmptyState, PageHeader, SkeletonRows } from "@jumelle/ui";
 
 export default function LivraisonsList() {
   const [livraisons, setLivraisons] = useState<Livraison[] | null>(null);
@@ -31,17 +31,17 @@ export default function LivraisonsList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-1">Livraisons producteurs</h1>
-      <p className="text-neutral-500 mb-4">
-        {livraisons
-          ? `${livraisons.length} bon(s) de livraison — ${totalKg.toLocaleString("fr-FR")} kg`
-          : "Chargement…"}
-      </p>
+      <PageHeader
+        title="Livraisons producteurs"
+        subtitle={
+          livraisons ? `${livraisons.length} bon(s) de livraison — ${totalKg.toLocaleString("fr-FR")} kg` : undefined
+        }
+      />
 
-      <label className="text-sm block mb-4">
+      <label className="text-sm block mb-4 text-stone-700">
         Station
         <select
-          className="border rounded px-2 py-1 text-sm ml-2"
+          className="border border-stone-300 rounded-md px-2 py-1 text-sm ml-2"
           value={stationFilter}
           onChange={(e) => setStationFilter(e.target.value)}
         >
@@ -56,23 +56,25 @@ export default function LivraisonsList() {
 
       <ErrorBanner error={error} />
 
+      {!livraisons && <SkeletonRows cols={6} />}
+
       {livraisons && livraisons.length === 0 && (
-        <EmptyState message="Aucune livraison pour ce filtre." />
+        <EmptyState icon="livraison" message="Aucune livraison pour ce filtre" />
       )}
 
       {livraisons && livraisons.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-stone-200 shadow-sm rounded-lg bg-white">
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Bon N°</th>
-                <th className="py-2 pr-4">Date</th>
-                <th className="py-2 pr-4">Producteur</th>
-                <th className="py-2 pr-4">Station</th>
-                <th className="py-2 pr-4">Produit</th>
-                <th className="py-2 pr-4">Poids (kg)</th>
-                <th className="py-2 pr-4">Prix (CDF/kg)</th>
-                <th className="py-2 pr-4">Appareil</th>
+              <tr className="text-left border-b border-stone-200 bg-stone-50">
+                <th className="py-2 px-4">Bon N°</th>
+                <th className="py-2 px-4">Date</th>
+                <th className="py-2 px-4">Producteur</th>
+                <th className="py-2 px-4">Station</th>
+                <th className="py-2 px-4">Produit</th>
+                <th className="py-2 px-4">Poids (kg)</th>
+                <th className="py-2 px-4">Prix (CDF/kg)</th>
+                <th className="py-2 px-4">Appareil</th>
               </tr>
             </thead>
             <tbody>
@@ -80,17 +82,17 @@ export default function LivraisonsList() {
                 const producteur = producteurById.get(l.producteurId);
                 const station = stationById.get(l.stationId);
                 return (
-                  <tr key={l.id} className="border-b">
-                    <td className="py-2 pr-4 font-mono text-xs">{l.bonNumber}</td>
-                    <td className="py-2 pr-4">{l.dateLivraison}</td>
-                    <td className="py-2 pr-4">
+                  <tr key={l.id} className="border-b border-stone-100 last:border-0 hover:bg-stone-50 transition-colors">
+                    <td className="py-2 px-4 font-mono text-xs">{l.bonNumber}</td>
+                    <td className="py-2 px-4">{l.dateLivraison}</td>
+                    <td className="py-2 px-4">
                       {producteur ? `${producteur.nom} ${producteur.prenom}` : l.producteurId.slice(0, 8)}
                     </td>
-                    <td className="py-2 pr-4">{station ? station.nom : l.stationId.slice(0, 8)}</td>
-                    <td className="py-2 pr-4">{l.produit === "cerises" ? "Cerises" : "Parche"}</td>
-                    <td className="py-2 pr-4">{l.poidsKg}</td>
-                    <td className="py-2 pr-4">{l.prixUnitaireCdf ?? "—"}</td>
-                    <td className="py-2 pr-4 font-mono text-xs">{l.deviceCode}</td>
+                    <td className="py-2 px-4">{station ? station.nom : l.stationId.slice(0, 8)}</td>
+                    <td className="py-2 px-4">{l.produit === "cerises" ? "Cerises" : "Parche"}</td>
+                    <td className="py-2 px-4">{l.poidsKg}</td>
+                    <td className="py-2 px-4">{l.prixUnitaireCdf ?? "—"}</td>
+                    <td className="py-2 px-4 font-mono text-xs">{l.deviceCode}</td>
                   </tr>
                 );
               })}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchProducteurs, type Producteur } from "../lib/api.js";
-import { DetailPanel, ErrorBanner, EmptyState, SearchInput } from "@jumelle/ui";
+import { DetailPanel, ErrorBanner, EmptyState, PageHeader, SearchInput, SkeletonRows } from "@jumelle/ui";
 
 export default function ProducteursList() {
   const [producteurs, setProducteurs] = useState<Producteur[] | null>(null);
@@ -27,12 +27,10 @@ export default function ProducteursList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-1">Producteurs</h1>
-      <p className="text-neutral-500 mb-4">
-        {producteurs
-          ? `${filtered!.length} / ${producteurs.length} producteur(s) synchronisé(s)`
-          : "Chargement…"}
-      </p>
+      <PageHeader
+        title="Producteurs"
+        subtitle={producteurs ? `${filtered!.length} / ${producteurs.length} producteur(s) synchronisé(s)` : undefined}
+      />
       <ErrorBanner error={error} />
 
       {producteurs && producteurs.length > 0 && (
@@ -41,43 +39,52 @@ export default function ProducteursList() {
         </div>
       )}
 
+      {!producteurs && <SkeletonRows cols={6} />}
+
       {producteurs && producteurs.length === 0 && (
-        <EmptyState message="Aucun producteur synchronisé pour le moment." />
+        <EmptyState
+          icon="producteur"
+          message="Aucun producteur synchronisé pour le moment"
+          description="Les agronomes enregistrent les producteurs depuis l'application terrain, hors ligne."
+        />
       )}
       {filtered && filtered.length === 0 && producteurs && producteurs.length > 0 && (
-        <EmptyState message="Aucun producteur ne correspond à la recherche." />
+        <EmptyState icon="search" message="Aucun producteur ne correspond à la recherche" />
       )}
       {filtered && filtered.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border border-stone-200 shadow-sm rounded-lg bg-white">
           <table className="min-w-full text-sm border-collapse">
             <thead>
-              <tr className="text-left border-b">
-                <th className="py-2 pr-4">Code producteur</th>
-                <th className="py-2 pr-4">Nom</th>
-                <th className="py-2 pr-4">Prénom</th>
-                <th className="py-2 pr-4">Sexe</th>
-                <th className="py-2 pr-4">Culture</th>
-                <th className="py-2 pr-4">Surface (ha)</th>
-                <th className="py-2 pr-4">Statut ICS</th>
-                <th className="py-2 pr-4">Village</th>
-                <th className="py-2 pr-4">Territoire</th>
-                <th className="py-2 pr-4">Détails</th>
+              <tr className="text-left border-b border-stone-200 bg-stone-50">
+                <th className="py-2 px-4">Code producteur</th>
+                <th className="py-2 px-4">Nom</th>
+                <th className="py-2 px-4">Prénom</th>
+                <th className="py-2 px-4">Sexe</th>
+                <th className="py-2 px-4">Culture</th>
+                <th className="py-2 px-4">Surface (ha)</th>
+                <th className="py-2 px-4">Statut ICS</th>
+                <th className="py-2 px-4">Village</th>
+                <th className="py-2 px-4">Territoire</th>
+                <th className="py-2 px-4">Détails</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className="border-b">
-                  <td className="py-2 pr-4 font-mono text-xs">{p.producerCode}</td>
-                  <td className="py-2 pr-4">{p.nom}</td>
-                  <td className="py-2 pr-4">{p.prenom}</td>
-                  <td className="py-2 pr-4">{p.sexe}</td>
-                  <td className="py-2 pr-4">{p.culturePrincipale}</td>
-                  <td className="py-2 pr-4">{p.surfaceBiologiqueHa}</td>
-                  <td className="py-2 pr-4">{p.statutIcs}</td>
-                  <td className="py-2 pr-4">{p.village}</td>
-                  <td className="py-2 pr-4">{p.territoire}</td>
-                  <td className="py-2 pr-4">
-                    <button className="text-emerald-700 underline" onClick={() => setDetail(p)}>
+                <tr key={p.id} className="border-b border-stone-100 last:border-0 hover:bg-stone-50 transition-colors">
+                  <td className="py-2 px-4 font-mono text-xs">{p.producerCode}</td>
+                  <td className="py-2 px-4">{p.nom}</td>
+                  <td className="py-2 px-4">{p.prenom}</td>
+                  <td className="py-2 px-4">{p.sexe}</td>
+                  <td className="py-2 px-4">{p.culturePrincipale}</td>
+                  <td className="py-2 px-4">{p.surfaceBiologiqueHa}</td>
+                  <td className="py-2 px-4">{p.statutIcs}</td>
+                  <td className="py-2 px-4">{p.village}</td>
+                  <td className="py-2 px-4">{p.territoire}</td>
+                  <td className="py-2 px-4">
+                    <button
+                      className="text-emerald-700 hover:text-emerald-900 underline transition-colors"
+                      onClick={() => setDetail(p)}
+                    >
                       Voir
                     </button>
                   </td>

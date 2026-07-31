@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase.js";
+import { Button, ErrorBanner, formInputClass } from "@jumelle/ui";
 
 interface LoginProps {
   onSignedIn: () => void;
@@ -8,7 +9,7 @@ interface LoginProps {
 export default function Login({ onSignedIn }: LoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -18,18 +19,18 @@ export default function Login({ onSignedIn }: LoginProps) {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
     if (signInError) {
-      setError(signInError.message);
+      setError(signInError);
       return;
     }
     onSignedIn();
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-      <form onSubmit={handleSubmit} className="w-80 flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Jumelle Café — Administration</h2>
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-xs flex flex-col gap-3 bg-white border border-stone-200 shadow-sm rounded-lg p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-stone-900 mb-1">Jumelle Café — Administration</h2>
         <input
-          className="border rounded px-3 py-2"
+          className={formInputClass}
           type="email"
           placeholder="Adresse e-mail"
           value={email}
@@ -37,17 +38,17 @@ export default function Login({ onSignedIn }: LoginProps) {
           required
         />
         <input
-          className="border rounded px-3 py-2"
+          className={formInputClass}
           type="password"
           placeholder="Mot de passe"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button className="bg-green-800 text-white rounded px-3 py-2" type="submit" disabled={submitting}>
+        <ErrorBanner error={error} />
+        <Button size="md" type="submit" disabled={submitting}>
           {submitting ? "Connexion…" : "Se connecter"}
-        </button>
+        </Button>
       </form>
     </div>
   );

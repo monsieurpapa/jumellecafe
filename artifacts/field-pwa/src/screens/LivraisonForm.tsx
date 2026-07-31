@@ -138,8 +138,8 @@ export default function LivraisonForm() {
         <div className="rounded-full bg-emerald-100 text-emerald-700 w-12 h-12 flex items-center justify-center text-2xl">
           ✓
         </div>
-        <h2 className="text-lg font-semibold">Livraison enregistrée</h2>
-        <p className="text-neutral-600">
+        <h2 className="text-lg font-semibold tracking-tight text-stone-900">Livraison enregistrée</h2>
+        <p className="text-stone-600">
           Bon N° : <span className="font-mono">{justSubmitted}</span>
         </p>
         <Button size="md" onClick={startNew}>
@@ -151,10 +151,10 @@ export default function LivraisonForm() {
 
   return (
     <div className="max-w-md mx-auto p-6 flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">Bon de livraison</h2>
+      <h2 className="text-lg font-semibold tracking-tight text-stone-900">Bon de livraison</h2>
 
       {stations.length === 0 && (
-        <p className="text-amber-700 text-sm">
+        <p className="text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-sm">
           Aucune station synchronisée. L'Admin Coopérative doit d'abord enregistrer les stations de lavage (une
           connexion est nécessaire pour la première synchronisation).
         </p>

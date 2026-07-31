@@ -118,6 +118,16 @@ export const transactionCreateSchema = z.object({
   dateTransaction: z.string().min(1),
 });
 
+/** Body of PATCH /api/transactions/:id — same field rules as create, all optional. */
+export const transactionUpdateSchema = z.object({
+  type: z.enum(["achat", "vente"]).optional(),
+  produit: z.enum(["cerises", "parche", "cafe_vert", "cacao_fermente", "cacao_standard", "autre"]).optional(),
+  contrepartie: z.string().min(1).optional(),
+  quantiteKg: z.number().positive().optional(),
+  prixUnitaireCdf: z.number().positive().optional(),
+  dateTransaction: z.string().min(1).optional(),
+});
+
 /** Body of PATCH /api/lots/:id — export bookkeeping only, never weight/composition. */
 export const lotUpdateSchema = z.object({
   statut: z.enum(["en_traitement", "pret_export", "exporte"]).optional(),
@@ -133,3 +143,4 @@ export type InspectionSyncValues = z.infer<typeof inspectionSyncSchema>;
 export type LotCreateValues = z.infer<typeof lotCreateSchema>;
 export type LotUpdateValues = z.infer<typeof lotUpdateSchema>;
 export type TransactionCreateValues = z.infer<typeof transactionCreateSchema>;
+export type TransactionUpdateValues = z.infer<typeof transactionUpdateSchema>;
