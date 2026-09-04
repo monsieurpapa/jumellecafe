@@ -50,4 +50,4 @@ Provisioned on PowerSync Cloud (org `monsieurpapa`, project `jumellecafe`, insta
 
 ## Skill routing
 
-When a request matches a gstack skill (bugs → `/investigate`, shipping → `/ship`, QA → `/qa`, design → `/design-review`, architecture → `/plan-eng-review`), invoke the skill first via the Skill tool before doing anything else.
+When a request matches a gstack skill (bugs → `/investigate`, shipping → `/ship`, QA → `/qa`, design → `/design-review`, architecture → `/plan-eng-review`), invoke the skill first via the Skill tool before doing anything else. For customer acquisition/GTM/growth/launch questions → invoke `/growth-playbook` (workspace-local, not a gstack skill).
